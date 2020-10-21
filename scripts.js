@@ -1,23 +1,15 @@
 //se favorites nao existir inicia com array vazio
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-const imageContainer = document.querySelector('.image')
+const imageContainer = document.querySelector('.image');
+const button = document.querySelector('button');
 
-
-
-//clicar no botao, pegar imagem externa
-document.querySelector('button').onclick = () => updateImage();
-
-//clicar na imagem
+//events
+button.onclick = () => updateImage();
 imageContainer.onclick = () => updateAll();
 
 // Methods
 
-function updateAll() {
-    updateFavorites();
-    updateClasses();
-}
-
-function updateFavorites() {
+function getState() {
     //salvar no localStorage ou remover
     const imageSource = document.querySelector('.image img').src
 
@@ -26,31 +18,48 @@ function updateFavorites() {
     const index = favorites.indexOf(imageSource);
     const existsInLocalStorage = index != -1;
 
-    if (existsInLocalStorage) {
-        //remove apartir do inicio -> splice(inicio, quantidade)
-        favorites.splice(index, 1);
+    return {imageSource, index, existsInLocalStorage};
+}
 
-    } else { //salvar se nao tiver no localStorage
-        favorites.push(imageSource);
-    }
+function updateAll() {
+    updateFavorites();
+    updateClasses();
+}
+
+function updateFavorites() {
+    
+    const {existsInLocalStorage, index, imageSource} = getState();
+
+    existsInLocalStorage 
+    ? favorites.splice(index, 1)
+    :favorites.push(imageSource);
+
+    // if (existsInLocalStorage) {
+    //     //remove apartir do inicio -> splice(inicio, quantidade)
+    //     favorites.splice(index, 1);
+
+    // } else { //salvar se nao tiver no localStorage
+    //     favorites.push(imageSource);
+    // }
 
 
     localStorage.setItem('favorites', JSON.stringify(favorites))
 }
 
 function updateClasses() {
-    const imageSource = document.querySelector('.image img').src
+    const {existsInLocalStorage} = getState();
 
-    const index = favorites.indexOf(imageSource);
-    const existsInLocalStorage = index != -1;
+    imageContainer.classList.remove('fav');
 
     if (existsInLocalStorage) {
         //remove a classe fav de favorito
-        imageContainer.classList.remove('fav');
-
-    } else {
         imageContainer.classList.add('fav');
     }
+}
+
+async function updateImage() {
+    await getExternalImage();
+    updateClasses();
 }
 
 async function getExternalImage() {
@@ -66,8 +75,5 @@ async function getExternalImage() {
 getExternalImage();
 
 
-function updateImage() {
-    getExternalImage();
-    updateClasses();
-}
+
 
